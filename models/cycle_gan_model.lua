@@ -27,12 +27,14 @@ function CycleGANModel:Initialize(opt)
   end
   -- define tensors
   if opt.test == 0 then  -- allocate tensors for training
-    self.real_A = torch.Tensor(opt.batchSize, opt.input_nc, opt.fineSize, opt.fineSize)
-    self.real_B = torch.Tensor(opt.batchSize, opt.output_nc, opt.fineSize, opt.fineSize)
-    self.fake_A = torch.Tensor(opt.batchSize, opt.input_nc, opt.fineSize, opt.fineSize)
-    self.fake_B = torch.Tensor(opt.batchSize, opt.output_nc, opt.fineSize, opt.fineSize)
-    self.rec_A  = torch.Tensor(opt.batchSize, opt.input_nc, opt.fineSize, opt.fineSize)
-    self.rec_B  = torch.Tensor(opt.batchSize, opt.output_nc, opt.fineSize, opt.fineSize)
+    self.real_A = torch.Tensor(opt.batchSize, opt.input_nc, opt.cTextSize)
+    self.real_B = torch.Tensor(opt.batchSize, opt.output_nc, opt.tMapSize, opt.tMapSize)
+
+    self.fake_A = torch.Tensor(opt.batchSize, opt.input_nc, opt.cTextSize)
+    self.fake_B = torch.Tensor(opt.batchSize, opt.output_nc, opt.tMapSize, opt.tMapSize)
+    
+    self.rec_A  = torch.Tensor(opt.batchSize, opt.input_nc, opt.cTextSize)
+    self.rec_B  = torch.Tensor(opt.batchSize, opt.output_nc, opt.tMapSize, opt.tMapSize)
   end
   -- load/define models
   local use_lsgan = ((opt.use_lsgan ~= nil) and (opt.use_lsgan == 1))
@@ -86,14 +88,17 @@ function CycleGANModel:Initialize(opt)
     local D_A_size = self.netD_A:forward(self.real_B):size()  -- hack: assume D_size_A = D_size_B
     self.fake_label_A = torch.Tensor(D_A_size):fill(0.0)
     self.real_label_A = torch.Tensor(D_A_size):fill(1.0) -- no soft smoothing
+
     local D_B_size = self.netD_B:forward(self.real_A):size()  -- hack: assume D_size_A = D_size_B
     self.fake_label_B = torch.Tensor(D_B_size):fill(0.0)
     self.real_label_B = torch.Tensor(D_B_size):fill(1.0) -- no soft smoothing
+    
     self.optimStateD_A = self:InitializeStates()
     self.optimStateG_A = self:InitializeStates()
     self.optimStateD_B = self:InitializeStates()
     self.optimStateG_B = self:InitializeStates()
     self:RefreshParameters()
+    
     print('---------- # Learnable Parameters --------------')
     print(('G_A = %d'):format(self.parametersG_A:size(1)))
     print(('D_A = %d'):format(self.parametersD_A:size(1)))
