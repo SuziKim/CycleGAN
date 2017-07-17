@@ -21,8 +21,8 @@ end
 
 function UnalignedDataLoader:Initialize(opt)
   opt.align_data = 0
-  self.dataA = data_util.load_dataset('A', opt, opt.input_nc)
-  self.dataB = data_util.load_dataset('B', opt, opt.output_nc)
+  self.dataA = data_util.load_dataset('CText', opt, opt.input_nc)
+  self.dataB = data_util.load_dataset('TMap', opt, opt.output_nc)
 end
 
 -- actually fetches the data
@@ -36,11 +36,11 @@ end
 
 -- returns the size of each dataset
 function UnalignedDataLoader:size(dataset)
-  if dataset == 'A' then
+  if dataset == 'CText' then
     return self.dataA:size()
   end
 
-  if dataset == 'B' then
+  if dataset == 'TMap' then
     return self.dataB:size()
   end
 
